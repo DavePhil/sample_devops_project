@@ -72,6 +72,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>sample_project</finalName>
     </build>
 
 </project>
