@@ -7,7 +7,7 @@ pipeline {
         APP_NAME = "devops-test"
         DOCKER_USER_NAME = "davechedjoun"
         IMAGE_NAME = "${DOCKER_USER_NAME}" + "/" + "${APP_NAME}"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        CONTAINER_NAME = "${BUILD_NUMBER}"
     }
     stages{
         stage('Build Project') {
@@ -44,8 +44,8 @@ pipeline {
         stage('Run the image'){
             steps{
                 script{
-                    bat "docker container rm -f ${IMAGE_NAME} || true"
-                    bat "docker run -d -p 8081:8081 ${IMAGE_NAME}"
+                    bat "docker container rm -f test_pipeline || true"
+                    bat "docker run -d -p 8081:8081 --name test_pipeline  ${IMAGE_NAME}"
                 }
             }
         }
