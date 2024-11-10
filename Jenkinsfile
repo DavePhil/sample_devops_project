@@ -38,10 +38,15 @@ pipeline {
                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
                     }
                     bat "docker push ${IMAGE_NAME}"
-                    bat "docker run ${IMAGE_NAME}:latest"
                }
             }
         }
-
+        stage('Run the image'){
+            steps{
+                script{
+                    bat bat "docker run -it -p 8081:8081 ${IMAGE_NAME}:latest"
+                }
+            }
+        }
     }
 }
