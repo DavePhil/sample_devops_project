@@ -44,7 +44,8 @@ pipeline {
         stage('Run the image'){
             steps{
                 script{
-                    bat "docker run -it -p 8081:8081 ${IMAGE_NAME}:latest"
+                    bat "docker container rm -f ${IMAGE_NAME} || true"
+                    bat "docker run -d -p 8081:8081 ${IMAGE_NAME}"
                 }
             }
         }
