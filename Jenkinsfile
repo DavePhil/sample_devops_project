@@ -1,34 +1,24 @@
 pipeline {
-    agent{
-        label "jenkins-agent"
-    }
+    agent any
     tools {
-        jdk 'Java17'
         maven 'Maven3'
     }
     environment {
-        APP_NAME = "complete-prodcution-e2e-pipeline"
-        RELEASE = "1.0.0"
-        DOCKER_USER = "dmancloud"
-        DOCKER_PASS = 'dockerhub'
-        IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
-        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
-        JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
+        APP_NAME = "devops-test"
+        DOCKER_USER_NAME = "davechedjoun"
+        IMAGE_NAME = "${DOCKER_USER_NAME}" + "/" + "${APP_NAME}"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
-    stages {
-        stage("Cleanup Workspace"){
+    stages{
+        stage('Build Project') {
             steps {
-                cleanWs()
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'mvn -B -DskipTests clean package'
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+                bat 'mvn -B -DskipTests clean install'
             }
         }
         stage('Test') {
             steps {
-                sh 'mvn test'
+                bat 'mvn test'
             }
             post {
                 always {
@@ -36,6 +26,21 @@ pipeline {
                 }
             }
         }
-    }
+        stage('Build Docker'){
+            steps {
+                bat "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+        stage('Deploy to Docker Hub'){
+            steps {
+               script{
+                   withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                       bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                    }
+                    bat "docker push ${IMAGE_NAME}"
+               }
+            }
+        }
 
+    }
 }
