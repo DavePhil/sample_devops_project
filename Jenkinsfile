@@ -10,6 +10,9 @@ pipeline {
         DAVE_RSA = "${DAVE_RSA}"
         SERVER_USER = "${SERVER_USER}"
         SERVER_IP = ""
+        AWS_ACCESS_KEY_ID     = ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY = ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION    = 'us-east-1'
         IMAGE_NAME = "${DOCKER_USER_NAME}/${APP_NAME}"
         CONTAINER_NAME = "${BUILD_NUMBER}"
     }
@@ -52,7 +55,7 @@ pipeline {
                     bat '''
                         cd terraform
                         terraform init
-                        terraform apply -auto-approve
+                        terraform apply -auto-approve -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
                     '''
                     SERVER_IP = bat(script: "terraform output -raw instance_ip", returnStdout: true).trim()
                     echo "Server IP: ${SERVER_IP}"
