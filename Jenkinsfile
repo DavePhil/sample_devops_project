@@ -54,7 +54,6 @@ pipeline {
                     withCredentials([file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')]) {
                         bat '''
                             copy %SSH_KEY_FILE% my-ssh-key.pem
-                            cat my-ssh-key.pem
                         '''
                     }
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
