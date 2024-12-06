@@ -55,6 +55,7 @@ pipeline {
                     bat '''
                         echo %AWS_SECRET_ACCESS_KEY%
                         echo %AWS_ACCESS_KEY_ID%
+                        echo %DAVE_RSA% > my-ssh-key.pem
                         cd terraform
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
