@@ -10,8 +10,8 @@ pipeline {
         DAVE_RSA = "${DAVE_RSA}"
         SERVER_USER = "${SERVER_USER}"
         SERVER_IP = ""
-        AWS_ACCESS_KEY_ID     = ${AWS_ACCESS_KEY_ID}
-        AWS_SECRET_ACCESS_KEY = ${AWS_SECRET_ACCESS_KEY}
+        AWS_ACCESS_KEY_ID     = "${AWS_ACCESS_KEY_ID}"
+        AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
         AWS_DEFAULT_REGION    = 'us-east-1'
         IMAGE_NAME = "${DOCKER_USER_NAME}/${APP_NAME}"
         CONTAINER_NAME = "${BUILD_NUMBER}"
