@@ -17,37 +17,37 @@ pipeline {
         CONTAINER_NAME = "${BUILD_NUMBER}"
     }
     stages {
-//         stage('Build Project') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-//                 bat 'mvn -B -DskipTests clean install'
-//             }
-//         }
-//         stage('Test') {
-//             steps {
-//                 bat 'mvn test'
-//             }
-//             post {
-//                 always {
-//                     junit 'target/surefire-reports/*.xml'
-//                 }
-//             }
-//         }
-//         stage('Build Docker') {
-//             steps {
-//                 bat "docker build -t ${IMAGE_NAME} ."
-//             }
-//         }
-//         stage('Deploy to Docker Hub'){
-//             steps {
-//                script{
-//                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                    }
-//                    bat "docker push ${IMAGE_NAME}"
-//                }
-//             }
-//         }
+        stage('Build Project') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+                bat 'mvn -B -DskipTests clean install'
+            }
+        }
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Build Docker') {
+            steps {
+                bat "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+        stage('Deploy to Docker Hub'){
+            steps {
+               script{
+                   withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                       bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                   }
+                   bat "docker push ${IMAGE_NAME}"
+               }
+            }
+        }
         stage('Deploy Infrastructure') {
             steps {
                 script {
@@ -72,25 +72,37 @@ pipeline {
                 }
             }
         }
-//         stage('Run the image') {
-//             steps {
-//                 script {
-//                     if (!SERVER_IP) {
-//                         error("SERVER_IP is not set! Check Terraform output.")
-//                     }
-//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                         bat """
-//                             ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                         """
-//                     }
-//                     bat """
-//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
-//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
-//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
-//                     """
-//                 }
-//             }
-//         }
+        stage('Run the image') {
+            steps {
+                script {
+                    if (!SERVER_IP) {
+                        error("SERVER_IP is not set! Check Terraform output.")
+                    }
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                        bat """
+                            ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                        """
+                    }
+                    bat """
+                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
+                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
+                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
+                    """
+                    withCredentials([
+                        string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
+                        file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
+                    ]) {
+                        bat """
+                            chmod 600 ${SSH_KEY_FILE}
+                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
+                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
+                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
+                        """
+                    }
+                }
+            }
+        }
     }
 }
