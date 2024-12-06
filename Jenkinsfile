@@ -84,7 +84,7 @@ pipeline {
                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
-                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
+                        ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                     """
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
@@ -95,7 +95,7 @@ pipeline {
                             ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
                             ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
-                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
+                            ssh -i ${SSH_KEY_FILE} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                         """
                     }
                 }
