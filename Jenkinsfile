@@ -51,11 +51,13 @@ pipeline {
         stage('Deploy Infrastructure') {
             steps {
                 script {
+                    withCredentials([file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')]) {
+                        bat '''
+                            copy %SSH_KEY_FILE% my-ssh-key.pem
+                        '''
+                    }
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                     bat '''
-                        echo %AWS_SECRET_ACCESS_KEY%
-                        echo %AWS_ACCESS_KEY_ID%
-                        echo %SSH_KEY% > my-ssh-key.pem
                         cd terraform
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
