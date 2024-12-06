@@ -54,6 +54,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')]) {
                         bat '''
                             copy %SSH_KEY_FILE% my-ssh-key.pem
+                            cat my-ssh-key.pem
                         '''
                     }
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
@@ -62,7 +63,12 @@ pipeline {
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                     '''
-                    SERVER_IP = bat(script: "terraform output -raw instance_ip", returnStdout: true).trim()
+                    def SERVER_IP =
+                    bat(script: '''
+                            cd terraform
+                            terraform output -raw instance_ip
+                          ''', returnStdout: true).trim()
+
                     echo "Server IP: ${SERVER_IP}"
                 }
             }
