@@ -75,9 +75,6 @@ pipeline {
         stage('Run the image') {
             steps {
                 script {
-                    if (!SERVER_IP) {
-                        error("SERVER_IP is not set! Check Terraform output.")
-                    }
                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
                         bat """
                             ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
