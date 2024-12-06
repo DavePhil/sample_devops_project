@@ -7,7 +7,7 @@ pipeline {
     environment {
         APP_NAME = "devops-test"
         DOCKER_USER_NAME = "davechedjoun"
-        DAVE_RSA = "${DAVE_RSA}"
+        SSH_KEY = credentials('my-ssh-key')
         SERVER_USER = "${SERVER_USER}"
         SERVER_IP = ""
         AWS_ACCESS_KEY_ID     = "${AWS_ACCESS_KEY_ID}"
@@ -55,7 +55,7 @@ pipeline {
                     bat '''
                         echo %AWS_SECRET_ACCESS_KEY%
                         echo %AWS_ACCESS_KEY_ID%
-                        echo %DAVE_RSA% > my-ssh-key.pem
+                        echo %SSH_KEY% > my-ssh-key.pem
                         cd terraform
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
@@ -73,14 +73,14 @@ pipeline {
 //                     }
 //                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
 //                         bat """
-//                             ssh -i ${DAVE_RSA} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+//                             ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
 //                         """
 //                     }
 //                     bat """
-//                         ssh -i ${DAVE_RSA} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                         ssh -i ${DAVE_RSA} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
-//                         ssh -i ${DAVE_RSA} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
-//                         ssh -i ${DAVE_RSA} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
+//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker pull ${IMAGE_NAME}"
+//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker container rm -f test_pipeline || true"
+//                         ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "docker run -d -p 8081:8081 --name test_pipeline ${IMAGE_NAME}"
 //                     """
 //                 }
 //             }
