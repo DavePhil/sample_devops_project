@@ -50,6 +50,7 @@ pipeline {
                 script {
                     checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                     bat '''
+                        cd terraform
                         terraform init
                         terraform apply -auto-approve
                     '''
