@@ -57,7 +57,7 @@ pipeline {
                         echo %AWS_ACCESS_KEY_ID%
                         cd terraform
                         terraform init
-                        terraform apply -auto-approve -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+                        terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                     '''
                     SERVER_IP = bat(script: "terraform output -raw instance_ip", returnStdout: true).trim()
                     echo "Server IP: ${SERVER_IP}"
