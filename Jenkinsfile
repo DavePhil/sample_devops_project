@@ -78,7 +78,6 @@ pipeline {
                            host: ip_address,
                            user: "${SERVER_USER}",
                            credentialsId: 'ssh_key'
-                           allowAnyHosts: true
                        ], command: """
                            sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
                            sudo docker pull ${IMAGE_NAME}
