@@ -67,6 +67,7 @@ pipeline {
                 script {
                     bat '''
                         cd terraform
+                        dir
                     '''
                     def serverIp = bat(
                         script: 'type server_ip.txt',
