@@ -10,8 +10,7 @@ pipeline {
         IMAGE_NAME = "${DOCKER_USER_NAME}/${APP_NAME}"
         CONTAINER_NAME = "${BUILD_NUMBER}"
         AWS_DEFAULT_REGION = 'us-east-1'
-        USER_NAME = 'AZIMUT'
-
+        SERVER_IP = ''
     }
     stages {
 //         stage('Build Project') {
@@ -73,17 +72,17 @@ pipeline {
                     def ip_address = address.split('\r?\n')[-1]
                     echo "L'adresse IP lue est : ${ip_address}"
                     withCredentials([
-                        sshUserPrivateKey(credentialsId: 'ssh_key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
-                        string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
-                        script {
-                            bat """
-                                icacls "%SSH_KEY%" /inheritance:r /grant:r ${USER_NAME}:(F)
-                                ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                                ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker pull ${IMAGE_NAME}"
-                                ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker container rm -f test_pipeline || true"
-                                ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
-                            """
-                        }
+                        string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
+                        file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
+                    ]) {
+                        bat """
+                            copy %SSH_KEY_FILE% my-ssh-key.pem
+                            icacls my-ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(F)
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                        """
                     }
                 }
             }
