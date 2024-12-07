@@ -48,7 +48,7 @@ pipeline {
         stage('Deploy Infrastructure') {
             steps {
                 script {
-                    withCredentials([file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')]) {
+                    withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                         bat '''
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                         '''
@@ -74,7 +74,7 @@ pipeline {
                     echo "L'adresse IP lue est : ${ip_address}"
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
-                        file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
+                        file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
                             icacls %SSH_KEY_FILE% /inheritance:r /grant:r ${USER_NAME}:(R)
