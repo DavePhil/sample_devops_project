@@ -70,12 +70,13 @@ pipeline {
                         returnStdout: true
                         ).trim()
                     serverIp = serverIp.replace('"', '')
+                    echo "Server IP: ${serverIp}"
+
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            echo "Server IP: ${serverIp}"
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker pull ${IMAGE_NAME}"
