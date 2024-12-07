@@ -73,7 +73,7 @@ pipeline {
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            scp -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no my-ssh-key.pem ${SERVER_USER}@${SERVER_IP}:
+                            copy %SSH_KEY_FILE% my-ssh-key.pem
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker pull ${IMAGE_NAME}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker container rm -f test_pipeline || true"
