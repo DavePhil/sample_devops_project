@@ -11,6 +11,7 @@ pipeline {
         CONTAINER_NAME = "${BUILD_NUMBER}"
         AWS_DEFAULT_REGION = 'us-east-1'
         SERVER_IP = ''
+        USER_NAME = 'AZIMUT'
     }
     stages {
 //         stage('Build Project') {
