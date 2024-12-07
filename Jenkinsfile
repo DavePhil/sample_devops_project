@@ -79,7 +79,7 @@ pipeline {
                         bat """
                             icacls "%SSH_KEY_FILE%" /inheritance:r
                             icacls "%SSH_KEY_FILE%" /remove "Everyone"
-                            icacls "%SSH_KEY_FILE%" /grant:r ${USER_NAME}:(R)
+                            icacls "%SSH_KEY_FILE%" /grant:r "%username%":(R)
                             icacls "%SSH_KEY_FILE%"
                             ssh -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
