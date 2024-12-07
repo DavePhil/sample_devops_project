@@ -50,6 +50,7 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')]) {
                         bat '''
+                            icacls %SSH_KEY_FILE% /inheritance:r /grant:r ${USER_NAME}:(F)
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                         '''
                     }
