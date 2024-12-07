@@ -77,7 +77,7 @@ pipeline {
                             name: 'MyRemoteServer',
                            host: ip_address,
                            user: "${SERVER_USER}",
-                           identityFile: 'my-ssh-key.pem',
+                           credentialsId: 'ssh_key'
                            allowAnyHosts: true
                        ], command: """
                            sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
