@@ -58,24 +58,27 @@ pipeline {
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                     '''
-                    def serverIp = bat(script: '''
-                        cd terraform
-                        terraform output -raw instance_ip
-                    ''', returnStdout: true).trim()
-                    echo "Server IP: ${serverIp}"
-                    SERVER_IP = serverIp
                 }
             }
         }
         stage('Run the image') {
             steps {
                 script {
+                    def serverIp = bat(script: '''
+                        cd terraform
+                        terraform output -raw instance_ip
+                    ''', returnStdout: true).trim()
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            echo "Server IP: ${SERVER_IP}"
+                            echo "Server IP: ${serverIp}"
+                            copy %SSH_KEY_FILE% my-ssh-key.pem
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker pull ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker container rm -f test_pipeline || true"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                         """
                     }
                 }
