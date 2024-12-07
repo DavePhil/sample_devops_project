@@ -74,6 +74,7 @@ pipeline {
                     echo "L'adresse IP lue est : ${ip_address}"
                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
                        sshCommand remote: [
+                            name: 'MyRemoteServer',
                            host: ip_address,
                            user: "${SERVER_USER}",
                            identityFile: 'my-ssh-key.pem',
