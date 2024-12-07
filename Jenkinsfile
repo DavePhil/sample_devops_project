@@ -50,8 +50,7 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                         bat '''
-                            echo Chemin du fichier source : %SSH_KEY_FILE%
-                            dir %SSH_KEY_FILE%
+                            icacls my-ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(F)
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                         '''
                     }
@@ -79,7 +78,7 @@ pipeline {
                         file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            icacls %SSH_KEY_FILE% /inheritance:r /grant:r ${USER_NAME}:(R)
+                            icacls %SSH_KEY_FILE% /inheritance:r /grant:r ${USER_NAME}:(F)
                             ssh -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                             ssh -i %SSH_KEY_FILE% -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
