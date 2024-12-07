@@ -67,19 +67,19 @@ pipeline {
                 script {
                     bat '''
                         cd terraform
-                        set /p serverIp=./server_ip.txt
-                        echo L'adresse IP lue est : %serverIp%
                     '''
+                    def ip_address = bat(script: "type \"server_ip.txt\"", returnStdout: true).trim()
+                    echo "L'adresse IP lue est : ${ip_address}"
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
                             copy %SSH_KEY_FILE% my-ssh-key.pem
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker pull ${IMAGE_NAME}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker container rm -f test_pipeline || true"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                         """
                     }
                 }
