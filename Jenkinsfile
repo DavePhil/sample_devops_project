@@ -83,6 +83,7 @@ pipeline {
                             icacls ssh-key.pem /remove "BUILTIN\\Utilisateurs"
                             icacls ssh-key.pem /grant:r ${USER_NAME}:(R)
                             icacls ssh-key.pem
+                            sed -i 's/\r$//' ssh-key.pem
                             ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                             ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
