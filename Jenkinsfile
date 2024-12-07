@@ -51,7 +51,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                         bat """
                             icacls my-ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(F)
-                            copy %SSH_KEY_FILE% my-ssh-key.pem
+                            copy %SSH_KEY_FILE% my-sshe-key.pem
                         """
                     }
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
