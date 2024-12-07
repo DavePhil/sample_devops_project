@@ -57,11 +57,12 @@ pipeline {
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                     '''
-                    SERVER_IP = bat(script: '''
+                    def serverIp = bat(script: '''
                         cd terraform
                         terraform output -raw instance_ip
                     ''', returnStdout: true).trim()
                     echo "Server IP: ${SERVER_IP}"
+                    env.SERVER_IP = serverIp
                 }
             }
         }
@@ -74,10 +75,10 @@ pipeline {
                     ]) {
                         bat """
                             copy %SSH_KEY_FILE% my-ssh-key.pem
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker pull ${IMAGE_NAME}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker container rm -f test_pipeline || true"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${SERVER_IP} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker pull ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker container rm -f test_pipeline || true"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                         """
                     }
                 }
