@@ -61,8 +61,8 @@ pipeline {
                         cd terraform
                         terraform output -raw instance_ip
                     ''', returnStdout: true).trim()
-                    echo "Server IP: ${SERVER_IP}"
                     env.SERVER_IP = serverIp
+                    echo "Server IP: ${env.SERVER_IP}"
                 }
             }
         }
