@@ -70,9 +70,9 @@ pipeline {
                         dir
                     '''
                     def serverIp = bat(
-                        script: 'type server_ip.txt',
+                        script: 'powershell -Command "Get-Content server_ip.txt | ForEach-Object {$_}"',
                         returnStdout: true
-                        ).trim()
+                    ).trim()
                     serverIp = serverIp.replace('"', '')
                     echo "Server IP: ${serverIp}"
 
