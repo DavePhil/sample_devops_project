@@ -68,11 +68,9 @@ pipeline {
                     bat '''
                         cd terraform
                     '''
-                     def ip_address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
-                    def clean_ip = ip_address.split('\r?\n')[-1] // Dernière ligne, qui est l'IP
-
-                    // Afficher l'adresse IP
-                    echo "L'adresse IP lue est : ${clean_ip}"
+                    def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
+                    def ip_address = address.split('\r?\n')[-1]
+                    echo "L'adresse IP lue est : ${ip_address}"
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
