@@ -63,7 +63,7 @@ pipeline {
                         terraform output -raw instance_ip
                     ''', returnStdout: true).trim()
                     echo "Server IP: ${serverIp}"
-                    env.SERVER_IP = serverIp
+                    SERVER_IP = serverIp
                 }
             }
         }
@@ -75,12 +75,7 @@ pipeline {
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            echo "Server IP: ${env.SERVER_IP}"
-                            copy %SSH_KEY_FILE% my-ssh-key.pem
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker pull ${IMAGE_NAME}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker container rm -f test_pipeline || true"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                            echo "Server IP: ${SERVER_IP}"
                         """
                     }
                 }
