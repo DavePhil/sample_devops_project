@@ -67,15 +67,9 @@ pipeline {
                 script {
                     bat '''
                         cd terraform
-                        dir
+                        set /p serverIp=./server_ip.txt
+                        echo L'adresse IP lue est : %serverIp%
                     '''
-                    def serverIp = bat(
-                        script: 'powershell -Command "(Get-Content server_ip.txt).Trim()"',
-                        returnStdout: true
-                    ).trim()
-                    serverIp = serverIp.replace('"', '')
-                    echo "Server IP: ${serverIp}"
-
                     withCredentials([
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
