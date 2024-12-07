@@ -78,7 +78,7 @@ pipeline {
                     ]) {
                         bat """
                             copy %SSH_KEY_FILE% ssh-key.pem
-                            icacls ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(F)
+                            icacls ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(R)
                             ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                             ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
