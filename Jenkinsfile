@@ -75,6 +75,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
                        withCredentials([sshUserPrivateKey(credentialsId: 'ssh_key', keyFileVariable: 'MY_SSH_KEY')]) {
                            bat """
+                               type ${MY_SSH_KEY}
                                icacls ${MY_SSH_KEY} /inheritance:r
                                icacls ${MY_SSH_KEY} /remove "BUILTIN\\Utilisateurs"
                                icacls ${MY_SSH_KEY} /grant:r ${USER_NAME}:(R)
