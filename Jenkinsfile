@@ -72,23 +72,17 @@ pipeline {
                     def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
                     def ip_address = address.split('\r?\n')[-1]
                     echo "L'adresse IP lue est : ${ip_address}"
-                    withCredentials([
-                        string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD'),
-                        file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')
-                    ]) {
-                        bat """
-                            copy %SSH_KEY_FILE% ssh-key.pem
-
-                            icacls ssh-key.pem /inheritance:r
-                            icacls ssh-key.pem /remove "BUILTIN\\Utilisateurs"
-                            icacls ssh-key.pem /grant:r ${USER_NAME}:(R)
-                            icacls ssh-key.pem
-                            ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                            ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
-                            ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
-                            ssh -i "%CD%\\ssh-key.pem" -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
-                        """
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
+                        sshagent(['ssh_key']) {
+                            bat """
+                                ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                                ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
+                                ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
+                                ssh -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                            """
+                        }
                     }
+
                 }
             }
         }
