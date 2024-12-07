@@ -50,6 +50,8 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                         bat '''
+                            echo Chemin du fichier source : %SSH_KEY_FILE%
+                            dir %SSH_KEY_FILE%
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                         '''
                     }
