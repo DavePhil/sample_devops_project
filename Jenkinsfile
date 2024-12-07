@@ -72,20 +72,18 @@ pipeline {
                     def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
                     def ip_address = address.split('\r?\n')[-1]
                     echo "L'adresse IP lue est : ${ip_address}"
-                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
-                       withCredentials([sshUserPrivateKey(credentialsId: 'ssh_key', keyFileVariable: 'MY_SSH_KEY')]) {
-                           bat """
-                               type ${MY_SSH_KEY}
-                               icacls ${MY_SSH_KEY} /inheritance:r
-                               icacls ${MY_SSH_KEY} /remove "BUILTIN\\Utilisateurs"
-                               icacls ${MY_SSH_KEY} /grant:r ${USER_NAME}:(R)
-                               icacls ${MY_SSH_KEY}
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
-                           """
-                       }
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                       sshCommand remote: [
+                           host: ip_address,
+                           user: "${SERVER_USER}",
+                           identityFile: 'my-ssh-key.pem',
+                           allowAnyHosts: true
+                       ], command: """
+                           sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
+                           sudo docker pull ${IMAGE_NAME}
+                           sudo docker container rm -f test_pipeline || true
+                           sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}
+                       """
                    }
                 }
             }
