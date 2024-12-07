@@ -12,37 +12,37 @@ pipeline {
         AWS_DEFAULT_REGION = 'us-east-1'
     }
     stages {
-        stage('Build Project') {
-            steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-                bat 'mvn -B -DskipTests clean install'
-            }
-        }
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('Build Docker') {
-            steps {
-                bat "docker build -t ${IMAGE_NAME} ."
-            }
-        }
-        stage('Deploy to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-                    }
-                    bat "docker push ${IMAGE_NAME}"
-                }
-            }
-        }
+//         stage('Build Project') {
+//             steps {
+//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+//                 bat 'mvn -B -DskipTests clean install'
+//             }
+//         }
+//         stage('Test') {
+//             steps {
+//                 bat 'mvn test'
+//             }
+//             post {
+//                 always {
+//                     junit 'target/surefire-reports/*.xml'
+//                 }
+//             }
+//         }
+//         stage('Build Docker') {
+//             steps {
+//                 bat "docker build -t ${IMAGE_NAME} ."
+//             }
+//         }
+//         stage('Deploy to Docker Hub') {
+//             steps {
+//                 script {
+//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+//                         bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+//                     }
+//                     bat "docker push ${IMAGE_NAME}"
+//                 }
+//             }
+//         }
         stage('Deploy Infrastructure') {
             steps {
                 script {
@@ -62,6 +62,7 @@ pipeline {
                         terraform output -raw instance_ip
                     ''', returnStdout: true).trim()
                     echo "Server IP: ${serverIp}"
+                    env.SERVER_IP = serverIp
                 }
             }
         }
@@ -73,6 +74,7 @@ pipeline {
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
+                            def serverIp = env.SERVER_IP
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker pull ${IMAGE_NAME}"
