@@ -76,7 +76,7 @@ pipeline {
                         string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
                         script {
                             bat """
-
+                                icacls "%SSH_KEY%" /inheritance:r /grant:r JenkinsUser:(F)
                                 ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                                 ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                                 ssh -i %SSH_KEY% -o StrictHostKeyChecking=no %SSH_USER%@${ip_address} "sudo docker container rm -f test_pipeline || true"
