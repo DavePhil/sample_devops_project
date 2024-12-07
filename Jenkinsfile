@@ -77,7 +77,9 @@ pipeline {
                            bat """
                                type ${MY_SSH_KEY}
                                echo ${MY_SSH_KEY} > temp_key.pem
-                               chmod chmod og= temp_key.pem
+                               icacls temp_key /inheritance:r
+                               icacls temp_key /remove "BUILTIN\\Utilisateurs"
+                               icacls temp_key /grant:r ${USER_NAME}:(R)
                                ssh -i temp_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                                ssh -i temp_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                                ssh -i temp_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
