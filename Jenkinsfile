@@ -75,15 +75,12 @@ pipeline {
                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DOCKERHUB_PWD')]) {
                        withCredentials([sshUserPrivateKey(credentialsId: 'ssh_key', keyFileVariable: 'MY_SSH_KEY')]) {
                            bat """
-                               copy ${MY_SSH_KEY} ssh-key.pem
-                               icacls ssh-key.pem /inheritance:r
-                               icacls ssh-key.pem /remove "BUILTIN\\Utilisateurs"
-                               icacls ssh-key.pem /grant:r ${USER_NAME}:(R)
-                               icacls ssh-key.pem
-                               ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                               echo ${MY_SSH_KEY} > temp_key.pem
+                               chmod 600 temp_key.pem
+                               ssh -i temp_key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                                ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
-                               ssh -i ${MY_SSH_KEY} -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                               ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
+                               ssh -i ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                            """
                        }
                    }
