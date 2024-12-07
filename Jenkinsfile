@@ -77,6 +77,7 @@ pipeline {
                     ]) {
                         bat """
                             copy %SSH_KEY_FILE% my-ssh-key.pem
+                            icacls my-ssh-key.pem /inheritance:r /grant:r JenkinsUser:(R)
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker pull ${IMAGE_NAME}"
                             ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${ip_address} "sudo docker container rm -f test_pipeline || true"
