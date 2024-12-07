@@ -74,12 +74,12 @@ pipeline {
                         file(credentialsId: 'my-ssh-key', variable: 'SSH_KEY_FILE')
                     ]) {
                         bat """
-                            def serverIp = env.SERVER_IP
+                            echo "Server IP: ${env.SERVER_IP}"
                             copy %SSH_KEY_FILE% my-ssh-key.pem
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker pull ${IMAGE_NAME}"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker container rm -f test_pipeline || true"
-                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${serverIp} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker login -u ${DOCKER_USER_NAME} -p ${DOCKERHUB_PWD}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker pull ${IMAGE_NAME}"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker container rm -f test_pipeline || true"
+                            ssh -i my-ssh-key.pem -o StrictHostKeyChecking=no ${SERVER_USER}@${env.SERVER_IP} "sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}"
                         """
                     }
                 }
