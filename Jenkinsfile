@@ -65,7 +65,9 @@ pipeline {
         stage('Run the image') {
             steps {
                 script {
-                    bat cd terraform
+                    bat '''
+                        cd terraform
+                    '''
                     def serverIp = bat(
                         script: 'type server_ip.txt',
                         returnStdout: true
