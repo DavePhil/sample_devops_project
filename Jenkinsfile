@@ -70,7 +70,7 @@ pipeline {
                         dir
                     '''
                     def serverIp = bat(
-                        script: 'powershell -Command "Get-Content server_ip.txt | ForEach-Object {$_}"',
+                        script: 'powershell -Command "(Get-Content terraform\\server_ip.txt).Trim()"',
                         returnStdout: true
                     ).trim()
                     serverIp = serverIp.replace('"', '')
