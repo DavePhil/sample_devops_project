@@ -49,18 +49,18 @@ pipeline {
             steps {
                 script {
                     withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
-                        bat '''
+                        bat """
                             icacls my-ssh-key.pem /inheritance:r /grant:r ${USER_NAME}:(F)
                             copy %SSH_KEY_FILE% my-ssh-key.pem
-                        '''
+                        """
                     }
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
-                    bat '''
+                    bat """
                         cd terraform
                         terraform init
                         terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                         terraform output -raw instance_ip > server_ip.txt
-                    '''
+                    """
                 }
             }
         }
