@@ -25,7 +25,7 @@ pipeline {
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                     bat """
                         cd terraform
-                        terraform destroy
+                        terraform destroy -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
                     """
                 }
             }
