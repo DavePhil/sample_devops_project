@@ -14,37 +14,6 @@ pipeline {
         USER_NAME = 'AZIMUT'
     }
     stages {
-//         stage('Build Project') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-//                 bat 'mvn -B -DskipTests clean install'
-//             }
-//         }
-//         stage('Test') {
-//             steps {
-//                 bat 'mvn test'
-//             }
-//             post {
-//                 always {
-//                     junit 'target/surefire-reports/*.xml'
-//                 }
-//             }
-//         }
-//         stage('Build Docker') {
-//             steps {
-//                 bat "docker build -t ${IMAGE_NAME} ."
-//             }
-//         }
-//         stage('Deploy to Docker Hub') {
-//             steps {
-//                 script {
-//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                         bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                     }
-//                     bat "docker push ${IMAGE_NAME}"
-//                 }
-//             }
-//         }
         stage('Deploy Infrastructure') {
             steps {
                 script {
@@ -56,36 +25,8 @@ pipeline {
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                     bat """
                         cd terraform
-                        terraform init
-                        terraform apply -auto-approve -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%"
-                        terraform output -raw instance_ip > server_ip.txt
+                        terraform destroy
                     """
-                }
-            }
-        }
-        stage('Run the image') {
-            steps {
-                script {
-                    bat '''
-                        cd terraform
-                    '''
-                    def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
-                    def ip_address = address.split('\r?\n')[-1]
-                    echo "L'adresse IP lue est : ${ip_address}"
-                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-                       sshCommand remote: [
-                            name: 'MyRemoteServer',
-                           host: ip_address,
-                           user: "${SERVER_USER}",
-                           credentialsId: 'ssh_key',
-                           allowAnyHosts: false
-                       ], command: """
-                           sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
-                           sudo docker pull ${IMAGE_NAME}
-                           sudo docker container rm -f test_pipeline || true
-                           sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}
-                       """
-                   }
                 }
             }
         }
