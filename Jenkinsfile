@@ -65,7 +65,7 @@ pipeline {
         stage('Deploy Infrastructure') {
             steps {
                 script {
-                    if (currentBuild.result == 'SUCCESS') {
+//                     if (currentBuild.result == 'SUCCESS') {
                         withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                             bat """
                                 copy %SSH_KEY_FILE% my-ssh-key.pem
@@ -85,9 +85,9 @@ pipeline {
                                 terraform output -raw instance_ip > server_ip.txt
                             """
                         }
-                    } else {
-                        echo "Deploy infrastructure skipped due to previous failure"
-                    }
+//                     } else {
+//                         echo "Deploy infrastructure skipped due to previous failure"
+//                     }
                 }
             }
         }
