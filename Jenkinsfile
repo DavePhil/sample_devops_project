@@ -14,37 +14,37 @@ pipeline {
         USER_NAME = 'AZIMUT'
     }
     stages {
-        stage('Build Project') {
-            steps {
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-                bat 'mvn -B -DskipTests clean install'
-            }
-        }
-        stage('Test') {
-            steps {
-                bat 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('Build Docker') {
-            steps {
-                bat "docker build -t ${IMAGE_NAME} ."
-            }
-        }
-        stage('Deploy to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-                    }
-                    bat "docker push ${IMAGE_NAME}"
-                }
-            }
-        }
+//         stage('Build Project') {
+//             steps {
+//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+//                 bat 'mvn -B -DskipTests clean install'
+//             }
+//         }
+//         stage('Test') {
+//             steps {
+//                 bat 'mvn test'
+//             }
+//             post {
+//                 always {
+//                     junit 'target/surefire-reports/*.xml'
+//                 }
+//             }
+//         }
+//         stage('Build Docker') {
+//             steps {
+//                 bat "docker build -t ${IMAGE_NAME} ."
+//             }
+//         }
+//         stage('Deploy to Docker Hub') {
+//             steps {
+//                 script {
+//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+//                         bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+//                     }
+//                     bat "docker push ${IMAGE_NAME}"
+//                 }
+//             }
+//         }
         stage('Check Infra Changes') {
             steps {
                 script {
