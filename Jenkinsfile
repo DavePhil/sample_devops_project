@@ -14,38 +14,62 @@ pipeline {
         USER_NAME = 'AZIMUT'
     }
     stages {
-//         stage('Build Project') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-//                 bat 'mvn -B -DskipTests clean install'
-//             }
-//         }
-//         stage('Test') {
-//             steps {
-//                 bat 'mvn test'
-//             }
-//             post {
-//                 always {
-//                     junit 'target/surefire-reports/*.xml'
-//                 }
-//             }
-//         }
-//         stage('Build Docker') {
-//             steps {
-//                 bat "docker build -t ${IMAGE_NAME} ."
-//             }
-//         }
-//         stage('Deploy to Docker Hub') {
-//             steps {
-//                 script {
-//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                         bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                     }
-//                     bat "docker push ${IMAGE_NAME}"
-//                 }
-//             }
-//         }
+        stage('Build Project') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+                bat 'mvn -B -DskipTests clean install'
+            }
+        }
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Build Docker') {
+            steps {
+                bat "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+        stage('Deploy to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                    }
+                    bat "docker push ${IMAGE_NAME}"
+                }
+            }
+        }
+        stage('Check Infra Changes') {
+            steps {
+                script {
+                    // Vérifier si des changements ont été effectués dans le dépôt d'infrastructure
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
+
+                    // Vérification des changements
+                    def changesDetected = bat(script: 'git diff --exit-code', returnStatus: true)
+
+                    if (changesDetected != 0) {
+                        echo "Changes detected in infrastructure repository"
+                        currentBuild.result = 'SUCCESS'  // Continuer avec la suite
+                    } else {
+                        echo "No changes detected in infrastructure repository"
+                        currentBuild.result = 'SUCCESS'  // Vous pouvez également choisir de ne pas continuer ou d'échouer
+                    }
+                }
+            }
+        }
         stage('Deploy Infrastructure') {
+            when {
+                expression {
+                    return currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 script {
                     withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
@@ -53,18 +77,20 @@ pipeline {
                             copy %SSH_KEY_FILE% my-ssh-key.pem
                         """
                     }
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
-                    bat """
-                        cd terraform
-                        terraform init
-                        terraform apply -auto-approve \
-                            -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" \
-                            -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%" \
-                            -var="docker_user_name=%DOCKER_USER_NAME%" \
-                            -var="dockerhub_pwd=%DOCKER_PWD%" \
-                            -var="image_name=%IMAGE_NAME%"
-                        terraform output -raw instance_ip > server_ip.txt
-                    """
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]){
+                        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
+                        bat """
+                            cd terraform
+                            terraform init
+                            terraform apply -auto-approve \
+                                -var="aws_access_key_id=%AWS_ACCESS_KEY_ID%" \
+                                -var="aws_secret_access_key=%AWS_SECRET_ACCESS_KEY%" \
+                                -var="docker_user_name=%DOCKER_USER_NAME%" \
+                                -var="dockerhub_pwd=%DockerhubPwd%" \
+                                -var="image_name=%IMAGE_NAME%"
+                            terraform output -raw instance_ip > server_ip.txt
+                        """
+                    }
                 }
             }
         }
