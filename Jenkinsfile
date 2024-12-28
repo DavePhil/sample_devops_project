@@ -48,18 +48,16 @@ pipeline {
         stage('Check Infra Changes') {
             steps {
                 script {
-                    // Vérifier si des changements ont été effectués dans le dépôt d'infrastructure
                     checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
 
-                    // Vérification des changements
                     def changesDetected = bat(script: 'git diff --exit-code', returnStatus: true)
 
                     if (changesDetected != 0) {
                         echo "Changes detected in infrastructure repository"
-                        currentBuild.result = 'SUCCESS'  // Continuer avec la suite
+                        currentBuild.result = 'SUCCESS'
                     } else {
                         echo "No changes detected in infrastructure repository"
-                        currentBuild.result = 'SUCCESS'  // Vous pouvez également choisir de ne pas continuer ou d'échouer
+                        currentBuild.result = 'FAILURE'
                     }
                 }
             }
