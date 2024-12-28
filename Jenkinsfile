@@ -71,6 +71,12 @@ pipeline {
                                 copy %SSH_KEY_FILE% my-ssh-key.pem
                             """
                         }
+
+                        bat """
+                                echo "Resources before Terraform" > resources_before.csv
+                                typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_before.csv
+                            """
+
                         withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
                             checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                             bat """
@@ -85,6 +91,14 @@ pipeline {
                                 terraform output -raw instance_ip > server_ip.txt
                             """
                         }
+
+                         bat """
+                                 echo "Resources after Terraform" > resources_after.csv
+                                 typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_after.csv
+                             """
+
+                         archiveArtifacts artifacts: 'resources_before.csv, resources_after.csv', fingerprint: true
+
 //                     } else {
 //                         echo "Deploy infrastructure skipped due to previous failure"
 //                     }
