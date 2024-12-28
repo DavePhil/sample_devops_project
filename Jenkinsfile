@@ -14,37 +14,37 @@ pipeline {
         USER_NAME = 'AZIMUT'
     }
     stages {
-//         stage('Build Project') {
-//             steps {
-//                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
-//                 bat 'mvn -B -DskipTests clean install'
-//             }
-//         }
-//         stage('Test') {
-//             steps {
-//                 bat 'mvn test'
-//             }
-//             post {
-//                 always {
-//                     junit 'target/surefire-reports/*.xml'
-//                 }
-//             }
-//         }
-//         stage('Build Docker') {
-//             steps {
-//                 bat "docker build -t ${IMAGE_NAME} ."
-//             }
-//         }
-//         stage('Deploy to Docker Hub') {
-//             steps {
-//                 script {
-//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                         bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
-//                     }
-//                     bat "docker push ${IMAGE_NAME}"
-//                 }
-//             }
-//         }
+        stage('Build Project') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project']])
+                bat 'mvn -B -DskipTests clean install'
+            }
+        }
+        stage('Test') {
+            steps {
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Build Docker') {
+            steps {
+                bat "docker build -t ${IMAGE_NAME} ."
+            }
+        }
+        stage('Deploy to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                        bat "docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}"
+                    }
+                    bat "docker push ${IMAGE_NAME}"
+                }
+            }
+        }
         stage('Check Infra Changes') {
             steps {
                 script {
@@ -65,15 +65,13 @@ pipeline {
         stage('Deploy Infrastructure') {
             steps {
                 script {
-//                     if (currentBuild.result == 'SUCCESS') {
+                    if (currentBuild.result == 'SUCCESS') {
                         withCredentials([file(credentialsId: 'ssh_key_file', variable: 'SSH_KEY_FILE')]) {
                             bat """
                                 copy %SSH_KEY_FILE% my-ssh-key.pem
                             """
                         }
-
-                        bat 'typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_before.csv'
-
+//                         bat 'typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_before.csv'
                         withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
                             checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/DavePhil/sample_devops_project_infra.git']])
                             bat """
@@ -88,14 +86,11 @@ pipeline {
                                 terraform output -raw instance_ip > server_ip.txt
                             """
                         }
-
-                        bat 'typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_after.csv'
-
+//                         bat 'typeperf "\\Processor(_Total)\\% Processor Time" "\\Memory\\Available MBytes" -sc 1 >> resources_after.csv'
                          archiveArtifacts artifacts: 'resources_before.csv, resources_after.csv', fingerprint: true
-
-//                     } else {
-//                         echo "Deploy infrastructure skipped due to previous failure"
-//                     }
+                    } else {
+                        echo "Deploy infrastructure skipped due to previous failure"
+                    }
                 }
             }
         }
