@@ -12,19 +12,11 @@ variables:
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
   ENV_FILE: ./.env
 
-cache:
-  paths:
-    - .m2/repository
 
 Build_project:
   image: maven:3.8-openjdk-17
   stage: Build
   script:
-    - echo "Vérification de Maven"
-    - mvn -v
-    - echo "Cloning project repository..."
-    - git clone --branch master https://github.com/DavePhil/sample_devops_project.git project
-    - cd project
     - echo "Building the project..."
     - mvn -B -DskipTests clean install
   artifacts:
@@ -34,7 +26,6 @@ Build_project:
 Test_project:
   stage: Test
   script:
-    - cd project
     - echo "Running tests..."
     - mvn test
 #  artifacts:
