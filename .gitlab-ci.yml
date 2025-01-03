@@ -13,45 +13,45 @@ variables:
   ENV_FILE: ./.env
 
 
-Build_project:
-  image: maven:3.8-openjdk-17
-  stage: Build
-  script:
-    - echo "Building the project..."
-    - mvn -B -DskipTests clean install
-  artifacts:
-    paths:
-      - target/*.jar
-
-Test_project:
-  image: maven:3.8-openjdk-17
-  stage: Test
-  script:
-    - echo "Running tests..."
-    - mvn test
-  artifacts:
-    when: always
-    paths:
-      - ./target/surefire-reports/*.xml
-
-
-publish_docker_image:
-  image: docker:latest
-  stage: Build_&_Publish_Docker_Image
-  services:
-    - docker:dind
-  only:
-    - master
-    - dev
-
-  script:
-    - echo "Building Docker image..."
-    - docker build -t $TAG_COMMIT -t $TAG_LATEST .
-    - echo "Logging into Docker registry..."
-    - docker login -u gitlab-ci-token -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - echo "Pushing Docker image to registry..."
-    - docker push $TAG_COMMIT
-    - docker push $TAG_LATEST
+#Build_project:
+#  image: maven:3.8-openjdk-17
+#  stage: Build
+#  script:
+#    - echo "Building the project..."
+#    - mvn -B -DskipTests clean install
+#  artifacts:
+#    paths:
+#      - target/*.jar
+#
+#Test_project:
+#  image: maven:3.8-openjdk-17
+#  stage: Test
+#  script:
+#    - echo "Running tests..."
+#    - mvn test
+#  artifacts:
+#    when: always
+#    paths:
+#      - ./target/surefire-reports/*.xml
+#
+#
+#publish_docker_image:
+#  image: docker:latest
+#  stage: Build_&_Publish_Docker_Image
+#  services:
+#    - docker:dind
+#  only:
+#    - master
+#    - dev
+#
+#  script:
+#    - echo "Building Docker image..."
+#    - docker build -t $TAG_COMMIT -t $TAG_LATEST .
+#    - echo "Logging into Docker registry..."
+#    - docker login -u gitlab-ci-token -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#    - echo "Pushing Docker image to registry..."
+#    - docker push $TAG_COMMIT
+#    - docker push $TAG_LATEST
 
 check_infra_changes:
   stage: Check_Infra_Changes
@@ -73,7 +73,7 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-#  image: hashicorp/terraform:latest
+  image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
     - echo "infrastructure..."
