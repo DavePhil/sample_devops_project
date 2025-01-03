@@ -70,7 +70,7 @@ deploy_infrastructure:
   script:
     - echo "Cloning infrastructure repository..."
     - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
-    - cd infra/terraform
+    - cd infra\terraform
     - echo "Initializing Terraform..."
     - terraform init
     - echo "Applying Terraform configurations..."
