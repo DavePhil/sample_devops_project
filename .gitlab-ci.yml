@@ -73,9 +73,10 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-  image: davechedjoun/terraform-with-bash
+  image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
+    - terrarform -help
     - /bin/sh -c '
       if [ -f no_changes.txt ]; then
       echo "No changes detected, skipping deployment.";
