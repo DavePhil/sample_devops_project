@@ -19,6 +19,8 @@ cache:
 Build_project:
   stage: Build
   script:
+    - echo "Vérification de Maven"
+    - mvn -v
     - echo "Cloning project repository..."
     - git clone --branch master https://github.com/DavePhil/sample_devops_project.git project
     - cd project
