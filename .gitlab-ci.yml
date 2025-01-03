@@ -29,10 +29,10 @@ Test_project:
   script:
     - echo "Running tests..."
     - mvn test
-#  artifacts:
-#    when: always
-#    paths:
-#      - ./target/surefire-reports/*.xml
+  artifacts:
+    when: always
+    paths:
+      - ./target/surefire-reports/*.xml
 
 
 publish_docker_image:
@@ -58,8 +58,7 @@ check_infra_changes:
   script:
     - echo "Cloning infrastructure repository..."
     - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
-    - cd infra
-    - ls
+    - cd infra38
     - echo "Checking for infrastructure changes..."
     - if git diff --exit-code; then
         echo "No changes detected" > ../no_changes.txt;
@@ -93,8 +92,6 @@ deploy_infrastructure:
       -var="dockerhub_pwd=$DOCKERHUB_PWD" \
       -var="image_name=$TAG_COMMIT"
     - terraform output -raw instance_ip > $IP_FILE
-  only:
-    - main
   dependencies:
     - check_infra_changes
 
