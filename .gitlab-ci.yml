@@ -27,6 +27,9 @@ Build_project:
     - cd project
     - echo "Building the project..."
     - mvn -B -DskipTests clean install
+  artifacts:
+    paths:
+      - target/*.jar
 
 Test_project:
   stage: Test
@@ -37,7 +40,7 @@ Test_project:
   artifacts:
     when: always
     paths:
-      - project/target/surefire-reports/*.xml
+      - ./target/surefire-reports/*.xml
 
 
 publish_docker_image:
