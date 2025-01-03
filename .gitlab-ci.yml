@@ -73,7 +73,7 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-  image: cloudposse/geodesic:latest
+  image: cytopia/terraform:latest
   stage: Deploy_Infrastructure
   script:
 #    - if [ -f no_changes.txt ]; then
