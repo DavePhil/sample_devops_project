@@ -73,15 +73,14 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-  image: hashicorp/terraform:latest
+#  image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
-    - terrarform -help
-    - /bin/sh -c '
-      if [ -f no_changes.txt ]; then
-      echo "No changes detected, skipping deployment.";
-      exit 0;
-      fi
+#    - /bin/sh -c '
+#      if [ -f no_changes.txt ]; then
+#      echo "No changes detected, skipping deployment.";
+#      exit 0;
+#      fi
       cd infra/terraform
       terraform init
       terraform apply -auto-approve \
