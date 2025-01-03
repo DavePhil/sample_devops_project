@@ -95,32 +95,32 @@ pipeline {
             }
         }
 
-//         stage('Run the image') {
-//             steps {
-//                 script {
-//                     bat '''
-//                         cd terraform
-//                     '''
-//                     def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
-//                     def ip_address = address.split('\r?\n')[-1]
-//                     echo "L'adresse IP lue est : ${ip_address}"
-//                     withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
-//                        sshCommand remote: [
-//                             name: 'MyRemoteServer',
-//                            host: ip_address,
-//                            user: "${SERVER_USER}",
-//                            credentialsId: 'ssh_key',
-//                            allowAnyHosts: false
-//                        ], command: """
-//                            sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
-//                            sudo docker pull ${IMAGE_NAME}
-//                            sudo docker container rm -f test_pipeline || true
-//                            sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}
-//                        """
-//                    }
-//                 }
-//             }
-//         }
+        stage('Run the image') {
+            steps {
+                script {
+                    bat '''
+                        cd terraform
+                    '''
+                    def address = bat(script: 'type "terraform\\server_ip.txt"', returnStdout: true).trim()
+                    def ip_address = address.split('\r?\n')[-1]
+                    echo "L'adresse IP lue est : ${ip_address}"
+                    withCredentials([string(credentialsId: 'DockerhubPwd', variable: 'DockerhubPwd')]) {
+                       sshCommand remote: [
+                            name: 'MyRemoteServer',
+                           host: ip_address,
+                           user: "${SERVER_USER}",
+                           credentialsId: 'ssh_key',
+                           allowAnyHosts: false
+                       ], command: """
+                           sudo docker login -u ${DOCKER_USER_NAME} -p ${DockerhubPwd}
+                           sudo docker pull ${IMAGE_NAME}
+                           sudo docker container rm -f test_pipeline || true
+                           sudo docker run -d -p 8080:8080 --name test_pipeline ${IMAGE_NAME}
+                       """
+                   }
+                }
+            }
+        }
 
     }
 }

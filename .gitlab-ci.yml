@@ -1,0 +1,121 @@
+stages:
+  - Build
+  - Test
+  - Build_&_Publish_Docker_Image
+  - Check_Infra_Changes
+  - Deploy_Infrastructure
+  - Get_Infra_Variables
+  - Deploy_Application
+
+variables:
+  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
+  ENV_FILE: ./.env
+
+cache:
+  paths:
+    - .m2/repository
+
+Build_project:
+  stage: Build
+  script:
+    - echo "Cloning project repository..."
+    - git clone --branch master https://github.com/DavePhil/sample_devops_project.git project
+    - cd project
+    - echo "Building the project..."
+    - mvn -B -DskipTests clean install
+
+Test_project:
+  stage: Test
+  script:
+    - cd project
+    - echo "Running tests..."
+    - mvn test
+  artifacts:
+    when: always
+    paths:
+      - project/target/surefire-reports/*.xml
+
+
+publish_docker_image:
+  image: docker:latest
+  stage: Build_&_Publish_Docker_Image
+  services:
+    - docker:dind
+  only:
+    - master
+    - dev
+
+  script:
+    - echo "Building Docker image..."
+    - docker build -t $TAG_COMMIT -t $TAG_LATEST .
+    - echo "Logging into Docker registry..."
+    - docker login -u gitlab-ci-token -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Pushing Docker image to registry..."
+    - docker push $TAG_COMMIT
+    - docker push $TAG_LATEST
+
+check_infra_changes:
+  stage: Check_Infra_Changes
+  script:
+    - echo "Cloning infrastructure repository..."
+    - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
+    - cd infra
+    - echo "Checking for infrastructure changes..."
+    - git diff --exit-code || echo "Changes detected in infrastructure repository"
+  allow_failure: true
+
+deploy_infrastructure:
+  stage: Deploy_Infrastructure
+  script:
+    - echo "Cloning infrastructure repository..."
+    - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
+    - cd infra/terraform
+    - echo "Initializing Terraform..."
+    - terraform init
+    - echo "Applying Terraform configurations..."
+    - terraform apply -auto-approve \
+      -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \
+      -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
+      -var="docker_user_name=$DOCKER_USER_NAME" \
+      -var="dockerhub_pwd=$DOCKERHUB_PWD" \
+      -var="image_name=$TAG_COMMIT"
+    - terraform output -raw instance_ip > $IP_FILE
+  only:
+    - main
+  dependencies:
+    - check_infra_changes
+
+read_ip_and_prepare_ssh:
+  stage: Get_Infra_Variables
+  script:
+    - cd infra/terraform
+    - ip_address=$(cat server_ip.txt | tr -d '\r')
+    - echo "Ladresse IP lue est $ip_address"
+    - echo "$SSH_PRIVATE_KEY" > my-ssh-key.pem
+    - chmod 600 my-ssh-key.pem
+    - echo "$ip_address" > ip_address.txt
+  artifacts:
+    paths:
+      - my-ssh-key.pem
+      - ip_address.txt
+
+
+deploy:
+  image: docker:latest
+  stage: Deploy_Application
+  tags:
+    - deployment
+  script:
+    - echo "Reading IP address from file..."
+    - ip_address=$(cat ip_address.txt)
+    - echo "Connexion à l'adresse IP ${ip_address}"
+    - chmod og= $PRIV_KEY_EC2
+    - apk update && apk add openssh-client
+    - echo "Deploying Docker container on remote server..."
+    - ssh -i $PRIV_KEY_EC2 -o StrictHostKeyChecking=no $USERNAME_EC2@$IP_EC2 "sudo docker login -u gitlab-ci-token -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
+    - ssh -i $PRIV_KEY_EC2 -o StrictHostKeyChecking=no $USERNAME_EC2@$IP_EC2 "sudo docker pull $TAG_COMMIT"
+    - ssh -i $PRIV_KEY_EC2 -o StrictHostKeyChecking=no $USERNAME_EC2@$IP_EC2 "sudo docker container rm -f test_pipeline  || true"
+    - ssh -i $PRIV_KEY_EC2 -o StrictHostKeyChecking=no $USERNAME_EC2@$IP_EC2 "sudo docker run -d -p 8080:8080 --name test_pipeline  $TAG_COMMIT"
+  dependencies:
+    - read_ip_and_prepare_ssh
