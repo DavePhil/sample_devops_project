@@ -58,7 +58,7 @@ check_infra_changes:
   script:
     - echo "Cloning infrastructure repository..."
     - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
-    - cd infra38
+    - cd infra
     - echo "Checking for infrastructure changes..."
     - if git diff --exit-code; then
         echo "No changes detected" > ../no_changes.txt;
