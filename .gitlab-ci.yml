@@ -37,10 +37,10 @@ Test_project:
     - cd project
     - echo "Running tests..."
     - mvn test
-  artifacts:
-    when: always
-    paths:
-      - ./target/surefire-reports/*.xml
+#  artifacts:
+#    when: always
+#    paths:
+#      - ./target/surefire-reports/*.xml
 
 
 publish_docker_image:
