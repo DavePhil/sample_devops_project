@@ -73,7 +73,7 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-  image: cytopia/terraform:latest
+  image: davechedjoun/terraform-with-bash
   stage: Deploy_Infrastructure
   script:
 #    - if [ -f no_changes.txt ]; then
