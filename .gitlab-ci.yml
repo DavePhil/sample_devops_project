@@ -59,6 +59,7 @@ check_infra_changes:
     - echo "Cloning infrastructure repository..."
     - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
     - cd infra
+    - ls
     - echo "Checking for infrastructure changes..."
     - git diff --exit-code || echo "Changes detected in infrastructure repository"
   allow_failure: true
