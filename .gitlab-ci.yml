@@ -17,6 +17,7 @@ cache:
     - .m2/repository
 
 Build_project:
+  image: maven:3.8-openjdk-17
   stage: Build
   script:
     - echo "Vérification de Maven"
