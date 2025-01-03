@@ -61,16 +61,28 @@ check_infra_changes:
     - cd infra
     - ls
     - echo "Checking for infrastructure changes..."
-    - git diff --exit-code || echo "Changes detected in infrastructure repository"
+    - if git diff --exit-code; then
+        echo "No changes detected" > ../no_changes.txt;
+        else
+        echo "Changes detected in infrastructure repository";
+        fi
   allow_failure: true
+  artifacts:
+      paths:
+        - infra
+        - no_changes.txt
+
 
 deploy_infrastructure:
   image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
+    - - if [ -f no_changes.txt ]; then
+        echo "No changes detected, skipping deployment.";
+        exit 0;
+        fi
     - echo "Cloning infrastructure repository..."
-    - git clone --branch main https://github.com/DavePhil/sample_devops_project_infra.git infra
-    - cd infra\terraform
+    - cd infra/terraform
     - echo "Initializing Terraform..."
     - terraform init
     - echo "Applying Terraform configurations..."
