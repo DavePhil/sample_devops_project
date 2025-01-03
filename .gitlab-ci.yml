@@ -80,9 +80,9 @@ deploy_infrastructure:
 #      echo "No changes detected, skipping deployment."
 #      exit 0
 #      fi
-    - echo "Cloning infrastructure repository..."
-    - cd infra/terraform
-    - echo "Initializing Terraform..."
+#    - echo "Cloning infrastructure repository..."
+#    - cd infra/terraform
+#    - echo "Initializing Terraform..."
     - terraform init
     - echo "Applying Terraform configurations..."
     - terraform apply -auto-approve \
