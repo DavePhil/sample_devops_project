@@ -77,7 +77,7 @@ deploy_infrastructure:
   image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
-    - - if [ -f no_changes.txt ]; then
+    - if [ -f no_changes.txt ]; then
         echo "No changes detected, skipping deployment.";
         exit 0;
         fi
