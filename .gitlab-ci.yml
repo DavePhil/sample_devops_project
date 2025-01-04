@@ -73,7 +73,9 @@ check_infra_changes:
 
 
 deploy_infrastructure:
-#  image: hashicorp/terraform:latest
+  image: hashicorp/terraform:latest
+  before_script:
+    - apk add --no-cache curl unzip
   stage: Deploy_Infrastructure
   script:
 #    - if [ -f no_changes.txt ]; then
