@@ -73,9 +73,7 @@ check_infra_changes:
 
 deploy_infrastructure:
   stage: Deploy_Infrastructure
-  tags:
-    - deployment
-  before_script:
+  script:
     - echo "Checking for Terraform installation..."
     - if ! command -v terraform &> /dev/null; then
       echo "Terraform not found, installing...";
@@ -86,7 +84,6 @@ deploy_infrastructure:
       else
       echo "Terraform is already installed.";
       fi
-  script:
 #    - if [ -f no_changes.txt ]; then
 #      echo "No changes detected, skipping deployment."
 #      exit 0
