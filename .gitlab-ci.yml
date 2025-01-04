@@ -76,21 +76,22 @@ deploy_infrastructure:
 #  image: hashicorp/terraform:latest
   stage: Deploy_Infrastructure
   script:
-#    - /bin/sh -c '
-#      if [ -f no_changes.txt ]; then
-#      echo "No changes detected, skipping deployment.";
-#      exit 0;
+#    - if [ -f no_changes.txt ]; then
+#      echo "No changes detected, skipping deployment."
+#      exit 0
 #      fi
-      cd infra/terraform
-      terraform init
-      terraform apply -auto-approve \
+    - echo "Cloning infrastructure repository..."
+    - cd infra/terraform
+    - echo "Initializing Terraform..."
+    - terraform init
+    - echo "Applying Terraform configurations..."
+    - terraform apply -auto-approve \
       -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \
       -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" \
       -var="docker_user_name=$DOCKER_USER_NAME" \
       -var="dockerhub_pwd=$DOCKERHUB_PWD" \
       -var="image_name=$TAG_COMMIT"
-      terraform output -raw instance_ip > $IP_FILE
-      '
+    - terraform output -raw instance_ip > $IP_FILE
   dependencies:
     - check_infra_changes
 
