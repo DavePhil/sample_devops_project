@@ -82,6 +82,8 @@ deploy_infrastructure:
 #      fi
     - echo "Cloning infrastructure repository..."
     - cd infra/terraform
+    - echo "validate Terraform..."
+    - terraform validate
     - echo "Initializing Terraform..."
     - terraform init
     - echo "Applying Terraform configurations..."
