@@ -90,10 +90,10 @@ deploy_infrastructure:
 #      fi
     - echo "Cloning infrastructure repository..."
     - cd infra/terraform
-    - echo "validate Terraform..."
-    - terraform validate
     - echo "Initializing Terraform..."
     - terraform init
+    - echo "validate Terraform..."
+    - terraform validate
     - echo "Applying Terraform configurations..."
     - terraform apply -auto-approve \
       -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" \
