@@ -73,6 +73,8 @@ check_infra_changes:
 
 deploy_infrastructure:
   stage: Deploy_Infrastructure
+  tags:
+    - deployment
   script:
     - echo "Checking for Terraform installation..."
     - if ! command -v terraform &> /dev/null; then
