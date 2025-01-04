@@ -64,15 +64,18 @@ check_infra_changes:
         else
         echo "Changes detected in infrastructure repository";
         fi
-    # Installer curl si nécessaire
-    - echo "Checking for curl installation..."
-    - if ! command -v curl &> /dev/null; then
-      echo "curl not found, installing...";
-      apt-get update && apt-get install -y curl;
-      else
-      echo "curl is already installed.";
-      fi
-    # Vérification et installation de Terraform
+  allow_failure: true
+  artifacts:
+      paths:
+        - infra
+        - no_changes.txt
+
+
+deploy_infrastructure:
+  stage: Deploy_Infrastructure
+  tags:
+    - deployment
+  before_script:
     - echo "Checking for Terraform installation..."
     - if ! command -v terraform &> /dev/null; then
       echo "Terraform not found, installing...";
@@ -83,15 +86,6 @@ check_infra_changes:
       else
       echo "Terraform is already installed.";
       fi
-  allow_failure: true
-  artifacts:
-      paths:
-        - infra
-        - no_changes.txt
-
-
-deploy_infrastructure:
-  stage: Deploy_Infrastructure
   script:
 #    - if [ -f no_changes.txt ]; then
 #      echo "No changes detected, skipping deployment."
