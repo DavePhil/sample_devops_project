@@ -75,6 +75,17 @@ deploy_infrastructure:
   stage: Deploy_Infrastructure
   tags:
     - deployment
+  before_script:
+    - echo "Checking for Terraform installation..."
+    - if ! command -v terraform &> /dev/null; then
+      echo "Terraform not found, installing...";
+      curl -fsSL https://releases.hashicorp.com/terraform/1.5.6/terraform_1.5.6_linux_amd64.zip -o terraform.zip;
+      unzip terraform.zip;
+      chmod +x terraform;
+      mv terraform /usr/local/bin/;
+      else
+      echo "Terraform is already installed.";
+      fi
   script:
 #    - if [ -f no_changes.txt ]; then
 #      echo "No changes detected, skipping deployment."
