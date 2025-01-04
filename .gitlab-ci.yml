@@ -64,7 +64,6 @@ check_infra_changes:
       else
       echo "Changes detected in infrastructure repository";
       fi
-  allow_failure: true
   artifacts:
     paths:
       - infra
