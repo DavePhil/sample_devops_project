@@ -95,6 +95,12 @@ deploy_infrastructure:
     - echo "validate Terraform..."
     - terraform validate
     - echo "Applying Terraform configurations..."
+    - terraform apply -auto-approve
+      -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
+      -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+      -var="docker_user_name=$gitlab-ci-token"
+      -var="dockerhub_pwd=$CI_REGISTRY_PASSWORD"
+      -var="image_name=$TAG_COMMIT"
     - terraform apply -auto-approve 
       -var="aws_access_key_id=$AWS_ACCESS_KEY_ID" 
       -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" 
