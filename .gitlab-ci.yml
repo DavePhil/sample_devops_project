@@ -88,6 +88,7 @@ deploy_infrastructure:
 #      exit 0
 #      fi
     - echo "Cloning infrastructure repository..."
+    - echo "$PRIV_KEY_EC2" > my-ssh-key.pem
     - cd infra/terraform
     - echo "Initializing Terraform..."
     - terraform init
