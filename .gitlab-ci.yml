@@ -92,8 +92,6 @@ check_infra_changes:
 
 deploy_infrastructure:
   stage: Deploy_Infrastructure
-  tags:
-    - deployment
   script:
 #    - if [ -f no_changes.txt ]; then
 #      echo "No changes detected, skipping deployment."
