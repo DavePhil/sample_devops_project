@@ -73,7 +73,6 @@ check_infra_changes:
 
 deploy_infrastructure:
   stage: Deploy_Infrastructure
-  image: hashicorp/terraform:1.5.6
   tags:
     - deployment
   script:
